@@ -174,6 +174,39 @@
     </div>
   </div>
 </div>
+<!-- Modal -->
+<div class="modal fade" id="modalCapturar" data-bs-backdrop="static" data-bs-keyboard="false"  tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+				<div id="datosPersonales">
+					<img src="https://panaderialalos.com/wp-content/uploads/2023/05/cupon.jpg" alt="">
+					<p class="lead">Acceda a un cupón de 10% descuento</p>
+					<p>Panadería Lalos está dado un cupón de 10% de descuento por rellenar su información</p>
+					<label for="">Sus nombres y apellidos</label>
+					<input type="text" class="form-control" id="txtCapturaNombre">
+					<label for="">Su número de celular</label>
+					<input type="text" class="form-control" id="txtCapturaCelular">
+					<label for="">Su correo electrónico</label>
+					<input type="text" class="form-control" id="txtCapturaCorreo">
+					<div class="form-check">
+						<input class="form-check-input" type="radio" name="flexRadioDefault" id="radioCupon" checked>
+						<label class="form-check-label" for="radioCupon">
+							<small>Acepta Ud. el manejo de los datos entrgados para recibir promociones de los productos Lalos de esta web.</small>
+						</label>
+					</div>
+					<button class="bnt btn-primary" onclick="capturarDatos()">Enviar datos y obtener descuento</button>
+				</div>
+				<div id="cuponGracias" class="d-none">
+					<p>Gracias por rellenar la información. Pronto recibirá promociones</p>
+					<button class="bnt btn-primary" data-bs-dismiss="modal" >Ver los productos</button>
+				</div>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
 <link rel="stylesheet" href="https://panaderialalos.com/promocion_mayo_2023_archivos/alertify.rtl.css"/>
 <script src="https://panaderialalos.com/promocion_mayo_2023_archivos/alertify.min.js"></script>
 
@@ -182,6 +215,7 @@
 	const modalVenta = new bootstrap.Modal('#modalVenta')
 	const modalGracias = new bootstrap.Modal('#modalGracias')
 	const modalEspera = new bootstrap.Modal('#modalEspera')
+	const modalCapturar = new bootstrap.Modal('#modalCapturar')
 	const canasta = document.getElementById('canasta');
 	const divTienda = document.getElementById('divTienda');
 	const divDomicilio = document.getElementById('divDomicilio');
@@ -198,8 +232,12 @@
 	var cliente = {
 		nombre:'', celular: '', 
 	}
+	function mostrarCupon(){
+		modalCapturar.show()
+	}
 
 	function main(){
+		setTimeout(mostrarCupon, 3000);
 		console.log('<-Script cargado->');
 		var torta1 = document.getElementById('torta1');
 		var torta2 = document.getElementById('torta2');
@@ -225,7 +263,29 @@
 			//console.log('pedido total: S/', suma);
 			modalVenta.show();
 		}
+
 		
+	}
+	
+	function capturarDatos(){
+		if( document.getElementById('txtCapturaNombre').value=='' || document.getElementById('txtCapturaCelular').value=='' || document.getElementById('txtCapturaCorreo').value=='' ){
+			alertify.set('notifier','position', 'top-right');
+			alertify.notify('Requerimos los 3 campos para acceder al cupón', 'error');
+		}else{
+			let formData = new FormData();
+			formData.append('nombre', document.getElementById('txtCapturaNombre').value);
+			formData.append('celular', document.getElementById('txtCapturaCelular').value);
+			formData.append('correo', document.getElementById('txtCapturaCorreo').value);
+			fetch('https://panaderialalos.com/promocion_mayo_2023_archivos/capturaDatos.php',{
+				method:'POST', body: formData
+			})
+			.then(response=> response.text())
+			.then(texto=> {
+				document.getElementById('datosPersonales').classList.add('d-none')
+				document.getElementById('cuponGracias').classList.remove('d-none')
+				console.log(texto)
+			})
+		}
 	}
 	function renderizar(){
 		canasta.innerHTML ='';
